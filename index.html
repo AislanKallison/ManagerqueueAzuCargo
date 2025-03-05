@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Azul Cargo Express</title>
+    <link href="css/bootstrap.css" rel="stylesheet">         
+    <link href="css/style.css" rel="stylesheet">
+    <script src="lib/jquery-3.3.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+    <script src="lib/scripts.js"></script>
+    <style>
+        /* Estilo para o contêiner do botão de upload */
+        .file-upload-container {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px; /* Ajuste o tamanho conforme necessário */
+            height: 30px; /* Ajuste o tamanho conforme necessário */
+            overflow: hidden;
+        }
+
+        /* Estilo para o input de arquivo */
+        #fileUpload {
+            position: absolute;
+            top: 0;
+            right: -90%; /* Move o botão para a direita, deixando apenas 10% visível */
+            width: 1000%; /* Aumenta o tamanho do botão para garantir que ele seja clicável */
+            height: 100%;
+            opacity: 0; /* Torna o botão invisível, mas ainda clicável */
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="barraTop">&nbsp;</div>
+    <div class="container page">
+        <div class="row barraSuperior">
+            <div class="col-xs-1">
+                <img src="/SistemachamadordeSenhaJS/imagens/Logo_da_Azul_Linhas_Aéreas_Brasileiras (1).svg" class="Azullogo"> 
+            </div>
+            <div class="col-xs-11" style="text-align: right;">
+                <p></p>
+                <span class="subtitulo"><b>Controle de Manifesto Fronteira Rápida</b></span><br>  
+                <span class="subtitulo"><b> NAT AIRPORT NATAL RN BRASIL</b></span><br>
+            </div>
+        </div>
+        <!-- Contêiner para o botão de upload -->
+        <div class="file-upload-container">
+            <input type="file" id="fileUpload" accept=".xlsx, .xls" />
+        </div>
+        <div class="row">
+            <div class="senhaAtual">
+                <div class="row">
+                    <div class="col-xs-5 col-xs-offset-1" style="text-align: right;"><br><br>
+                        <span class="senhaAtualTexto">RETIDOS &nbsp;</span>
+                    </div>
+                    <div class="col-xs-5" style="text-align: left;">
+                        <span id="senhaAtualNumero">0000</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-4 col-xs-offset-4 ultimaSenha">
+                <br>
+                <span id="ultimaSenhaTexto">0000</span><br>
+                <span id="ultimaSenhaNumero">0000</span>
+            </div>
+        </div>
+    </div>
+    <audio id="audioChamada" src="audio/chamada.wav"></audio>
+    <script>
+        jQuery(document).ready(function($) {
+            $("#fileUpload").on("change", function(e) {
+                var file = e.target.files[0];
+                if (!file) return;
+
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var data = new Uint8Array(e.target.result);
+                    var workbook = XLSX.read(data, { type: 'array' });
+
+                    // Suponha que a primeira planilha seja a que contém os dados
+                    var firstSheetName = workbook.SheetNames[0];
+                    var worksheet = workbook.Sheets[firstSheetName];
+
+                    // Converter a planilha para JSON
+                    var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+                    // Processar os dados
+                    processarDados(jsonData);
+
+                    // Reproduzir o áudio após processar os dados
+                    var audio = document.getElementById("audioChamada");
+                    audio.play().catch(error => {
+                        console.error("Erro ao reproduzir áudio:", error);
+                    });
+                };
+                reader.readAsArrayBuffer(file);
+            });
+
+            function processarDados(data) {
+                // Suponha que a primeira coluna contenha os números dos retidos
+                var retidos = data.map(row => row[0]).filter(Boolean); // Filtra valores vazios
+
+                // Atualizar a quantidade de retidos na interface
+                $("#senhaAtualNumero").text(retidos.length);
+                $("#senhaNormal").val(retidos.length);
+            }
+        });
+    </script>
+</body>
+</html> 
+
+
+
